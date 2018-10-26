@@ -1,5 +1,11 @@
 from servidorChat import ServidorChat
 
-servidor = ServidorChat()
+lista = [1,2,3,4,5,6,7,8,9]
 
-servidor.abreSalaGeral()
+print(lista[:-2])
+
+texto = "Eric Calasans de Barros"
+
+espaco = zip(texto)
+
+print(espaco)

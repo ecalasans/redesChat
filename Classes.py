@@ -9,7 +9,7 @@ class Cliente:
         self.porta = porta
 
     def getCliente(self):
-        return (self.ip, self.nickName, self.porta)
+        return '{}\0{}\0{}\0'.format(self.ip, self.porta, self.nickName)
 
 '''
 Class Mensagem
@@ -24,4 +24,11 @@ class Mensagem:
         self.mensagem = mensagem
 
     def getMensagemCompleta(self):
-        return (self.tamahoMensagem, self.ipOrigem, self.ipDestino, self.nickName, self.comando, self.mensagem)
+        return '{}\0{}\0{}\0{}\0{}\0{}\0'.format(
+            self.tamahoMensagem,
+            self.ipOrigem,
+            self.ipDestino,
+            self.nickName,
+            self.comando,
+            self.mensagem
+        )
