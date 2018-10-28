@@ -3,58 +3,82 @@ import threading
 from Classes import Cliente, Mensagem
 
 class ServidorChat:
-#Atributos
-    host = socket.gethostbyname(socket.gethostname())
+    #Atributos
+    clientes = {} #Sockets de clientes conectados
+    enderecos = {} #Endereços dos clientes conectados(key:socket de cliente, value:endereco)
+
+    #CONSTANTES
+    HOST = ''
+    BUFFERSIZE = 1024
+    PORTA_SERVIDOR = 2018
+    ENDERECO = (HOST, PORTA_SERVIDOR)
+
 
 #Métodos
     #Construtor
-    def __init__(self, clientes=[], salas=[]):
+    def __init__(self, clientes={}, enderecos=[]):
         self.clientes = clientes
-        self.salas = salas
+        self.enderecos = enderecos
 
     #Cria conexão
-    def abreSala(self, bufferSize=1024):
+    def onlineServidor(self):
 
         #Criação do socket
-        conexPorta = 2000
-        salaSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Socket TCP
+        servSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Socket TCP
 
         #Tenta fazer a ligação do socket
         try:
-            salaSocket.bind(('', conexPorta))
+            servSocket.bind(self.ENDERECO)
         except:
             print('Falha na ligação!')
 
 
-        salaSocket.listen()
-        msgOnline = "Servidor online!\nSala Geral aberta e esperando conexões na porta %d" % (conexPorta)
+        #Coloca o servidor em modo de escuta
+        servSocket.listen(100)  #Máximo de 100 conexões
+        msgOnline = "Servidor online!\nSala Geral aberta e esperando conexões na porta %d" % (self.PORTA_SERVIDOR)
         print(msgOnline)
 
-        #Retorna o socket de conexão à sala
-        return salaSocket
+        #Loop onde o servidor maneja as conexões dos clientes, atualizando as listas e
+        #requistando o nickname
+        while True:
+            clienteSocket, clienteEndereco = servSocket.accept()
+            print('{}:{} conectou-se!'.format(clienteEndereco))
 
-    def manipulaMsg(self, msg=Mensagem()):
-        componentes = msg.getMensagemCompleta().split(b'\0')
+            #Solicita o nick ao cliente
+            clienteSocket.send('Digite seu nick:  '.encode('utf-8'))
 
-        msg = componentes[:-1]
-        resto = componentes[-1]
+            #Adiciona o endereco do cliente ao dicionário
+            self.enderecos[clienteSocket] = clienteEndereco
 
-        return (msg, resto)
-
-    def recebeMsgs(self, dados=bytes()):
-        '''
-        Função para enviar uma mensagem a um cliente
-        :param mensagem: Objeto do tipo Mensagem
-        :return:
-        '''
+            #thread para manipular um cliente
+            threadCliente = threading.Thread(target=self.manipulaCliente, args=(clienteSocket,)).start()
 
 
+    def manipulaCliente(self, cliente):
+        #Recebe o nick do cliente
+        nick = cliente.recv(self.BUFFERSIZE).decode('utf-8')
 
-    def adicionaCliente(self, cliente):
-        self.clientes.append(cliente)
+        #Responde ao cliente após receber o nick
+        cliente.send('Bem-vindo, {}!  Digite \'sair\' para encerrar a conexão!'.format(nick).encode('utf-8'))
 
-    def deletaCliente(self, cliente):
-        self.clientes.remove(cliente)
+        #Alerta a todos sobre a conexão
+        self.mensBroadcast('{} conectou-se'.format(nick).encode('utf-8'))
+
+        #Adiciona o nick ao dicionário de clientes
+        self.clientes[cliente] = nick
+
+        #Loop para transmissão das mensagens para todos os clientes
+        while True:
+            msgCliente = cliente.recv(self.BUFFERSIZE)
+
+            #Se o comando for sair, encerra a conexão e avisa a todos
+            if msgCliente == 'sair':
+                #Envia o comando para ser manipulado do lado do cliente
+
+    def mensBroadcast(self, mensagem, nick):
+        #Varre o dicionáriio de clientes e manda a mensagem para todos
+        for cliente in self.clientes:
+            cliente.send("{} - {}".format(nick, mensagem).encode('utf-8'))
 
 
 
