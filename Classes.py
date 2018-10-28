@@ -36,21 +36,7 @@ class Mensagem:
             self.mensagem
         )
 
-        # Cria objeto do tipo Mensagem com a string recebida
-        def desempacotaMensagem(self, mensagem):
-            # Cria lista com a mensagem , separando pelo caractere nulo
-            itens = mensagem.split(b'\0')
 
-            # Cria objeto do tipo Mensagem e popula com itens da lista
-            objMsg = Mensagem()
-            objMsg.tamahoMensagem = itens[0]
-            objMsg.ipOrigem = itens[1]
-            objMsg.ipDestino = itens[2]
-            objMsg.nickName = itens[3]
-            objMsg.comando = itens[4]
-            objMsg.mensagem = itens[5]
-
-            return objMsg
 
 #Obtém ip da interface de rede usada
 def getNetworkIP():
@@ -78,3 +64,19 @@ def getNetworkIP():
 
     #Retorna o ip da interface de rede
     return ip
+
+# Cria objeto do tipo Mensagem com a string recebida
+def desempacotaMensagem(mensagem):
+# Cria lista com a mensagem , separando pelo caractere nulo
+    itens = mensagem.split(b'\0')
+
+    # Cria objeto do tipo Mensagem e popula com itens da lista
+    objMsg = Mensagem()
+    objMsg.tamahoMensagem = itens[0]
+    objMsg.ipOrigem = itens[1]
+    objMsg.ipDestino = itens[2]
+    objMsg.nickName = itens[3]
+    objMsg.comando = itens[4]
+    objMsg.mensagem = itens[5]
+
+    return objMsg

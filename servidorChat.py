@@ -43,11 +43,12 @@ class ServidorChat:
         #requistando o nickname
         while True:
             clienteSocket, clienteEndereco = servSocket.accept()
-            print('{}:{} conectou-se!'.format(clienteEndereco))
+            print('{}:{} conectou-se!'.format(clienteEndereco[0], clienteEndereco[1]))
 
             #Solicita o nick ao cliente
-            solNick = Mensagem(self.getNetworkIP(), clienteEndereco[0], 'serv', 'n', 'Digite seu nick:  ')
-            clienteSocket.send(solNick.encode('utf-8'))
+            solNick = Mensagem(str(len('Digite seu nick:  ')),self.HOST_INTERFACE_REDE, clienteEndereco[0],
+                               'serv', 'n', 'Digite seu nick:  ')
+            clienteSocket.send(solNick.getMensagemCompleta().encode('utf-8'))
 
             #Adiciona o endereco e porta do cliente ao dicionário
             self.enderecos[clienteSocket] = clienteEndereco
@@ -61,28 +62,31 @@ class ServidorChat:
         recebidoDoCliente = cliente.recv(self.BUFFERSIZE).decode('utf-8')
 
         #Extrai o nick enviado
-        nick = Mensagem(recebidoDoCliente).nickName
+        nick = Classes.desempacotaMensagem(recebidoDoCliente).nickName
 
         #Responde ao cliente após receber o nick
         msgBoasVindas = 'Bem-vindo, {}!  Digite \'q\' para sair!'.format(nick)
         respostaAoCliente = Mensagem(str(len(msgBoasVindas)), self.HOST_INTERFACE_REDE,
-                                     self.enderecos[cliente][0], 'serv', '', msgBoasVindas)
+                                     self.enderecos[cliente][0], 'serv', 'p', msgBoasVindas)
         cliente.send(respostaAoCliente.getMensagemCompleta().encode('utf-8'))
 
         #Alerta a todos sobre a conexão
-        self.mensBroadcast('{} conectou-se'.format(nick).encode('utf-8'))
+        self.mensBroadcast('{} conectou-se'.format(nick), nick)
 
         #Adiciona o nick ao dicionário de clientes
         self.clientes[cliente] = cliente
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
-            msgCliente = cliente.recv(self.BUFFERSIZE)
+            msgCliente = cliente.recv(self.BUFFERSIZE).decode('utf-8')
+
+            #Transforma string em
+            msgCliente = Classes.desempacotaMensagem(msgCliente)
 
             #Se o comando for sair, encerra a conexão e avisa a todos
-            if msgCliente == 'sair':
+            if msgCliente.comando == 's':
                 #Envia comando para ser tratado do lado do cliente
-                cliente.send('sair'.encode('utf-8'))
+                cliente.send('s'.encode('utf-8'))
 
                 #Desconecta o cliente
                 cliente.close()
@@ -98,8 +102,6 @@ class ServidorChat:
             else:
                 #Segue enviando mensagens para todos os clientes
                 self.mensBroadcast(msgCliente,nick)
-
-
 
 
     def mensBroadcast(self, mensagem, nick):
