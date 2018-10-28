@@ -73,7 +73,26 @@ class ServidorChat:
 
             #Se o comando for sair, encerra a conexão e avisa a todos
             if msgCliente == 'sair':
-                #Envia o comando para ser manipulado do lado do cliente
+                #Envia comando para ser tratado do lado do cliente
+                cliente.send('sair'.encode('utf-8'))
+
+                #Desconecta o cliente
+                cliente.close()
+
+                #Remove do dicionário de clientes
+                del self.clientes[cliente]
+
+                #Avisa aos demais clientes da desconexão
+                self.mensBroadcast('{} desconectou-se!'.format(nick), nick)
+
+                #Sai do loop
+                break
+            else:
+                #Segue enviando mensagens para todos os clientes
+                self.mensBroadcast(msgCliente,nick)
+
+
+
 
     def mensBroadcast(self, mensagem, nick):
         #Varre o dicionáriio de clientes e manda a mensagem para todos
