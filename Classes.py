@@ -1,3 +1,6 @@
+import ifaddr
+
+
 '''
 Classe Cliente
 '''
@@ -32,3 +35,46 @@ class Mensagem:
             self.comando,
             self.mensagem
         )
+
+        # Cria objeto do tipo Mensagem com a string recebida
+        def desempacotaMensagem(self, mensagem):
+            # Cria lista com a mensagem , separando pelo caractere nulo
+            itens = mensagem.split(b'\0')
+
+            # Cria objeto do tipo Mensagem e popula com itens da lista
+            objMsg = Mensagem()
+            objMsg.tamahoMensagem = itens[0]
+            objMsg.ipOrigem = itens[1]
+            objMsg.ipDestino = itens[2]
+            objMsg.nickName = itens[3]
+            objMsg.comando = itens[4]
+            objMsg.mensagem = itens[5]
+
+            return objMsg
+
+#Obtém ip da interface de rede usada
+def getNetworkIP():
+    ip = ''
+    #Coleta dados sobre os adaptadores de rede
+    adapters = ifaddr.get_adapters()
+
+    #lista que irá conter os ips dos adaptadores de rede do dispositivo
+    lista = []
+
+    for adapt in adapters:
+        for objIP in adapt.ips:
+
+            #Adiciona os ips à lista de ips
+            lista.append(objIP.ip)
+
+    #Busca o ip da interface de rede usada para conexão eliminando o localhost
+    for itemIP in lista:
+        if isinstance(itemIP, tuple):
+            continue
+        else:
+            if itemIP.find('127'):
+                ip = itemIP
+                break
+
+    #Retorna o ip da interface de rede
+    return ip

@@ -1,24 +1,25 @@
 import socket
 import threading
+import ifaddr   #Biblioteca para obter dados dos adaptatores de rede(https://pythonhosted.org/ifaddr/)
+import Classes
+from Classes import Mensagem
+
 from Classes import Cliente, Mensagem
 
 class ServidorChat:
-    #Atributos
-    clientes = {} #Sockets de clientes conectados
-    enderecos = {} #Endereços dos clientes conectados(key:socket de cliente, value:endereco)
-
     #CONSTANTES
     HOST = ''
     BUFFERSIZE = 1024
     PORTA_SERVIDOR = 2018
     ENDERECO = (HOST, PORTA_SERVIDOR)
-
+    HOST_INTERFACE_REDE = Classes.getNetworkIP()
 
 #Métodos
     #Construtor
-    def __init__(self, clientes={}, enderecos=[]):
+    def __init__(self, clientes, enderecos):
         self.clientes = clientes
         self.enderecos = enderecos
+
 
     #Cria conexão
     def onlineServidor(self):
@@ -34,7 +35,7 @@ class ServidorChat:
 
 
         #Coloca o servidor em modo de escuta
-        servSocket.listen(100)  #Máximo de 100 conexões
+        servSocket.listen(10000)  #Máximo de 100 conexões
         msgOnline = "Servidor online!\nSala Geral aberta e esperando conexões na porta %d" % (self.PORTA_SERVIDOR)
         print(msgOnline)
 
@@ -45,9 +46,10 @@ class ServidorChat:
             print('{}:{} conectou-se!'.format(clienteEndereco))
 
             #Solicita o nick ao cliente
-            clienteSocket.send('Digite seu nick:  '.encode('utf-8'))
+            solNick = Mensagem(self.getNetworkIP(), clienteEndereco[0], 'serv', 'n', 'Digite seu nick:  ')
+            clienteSocket.send(solNick.encode('utf-8'))
 
-            #Adiciona o endereco do cliente ao dicionário
+            #Adiciona o endereco e porta do cliente ao dicionário
             self.enderecos[clienteSocket] = clienteEndereco
 
             #thread para manipular um cliente
@@ -56,16 +58,22 @@ class ServidorChat:
 
     def manipulaCliente(self, cliente):
         #Recebe o nick do cliente
-        nick = cliente.recv(self.BUFFERSIZE).decode('utf-8')
+        recebidoDoCliente = cliente.recv(self.BUFFERSIZE).decode('utf-8')
+
+        #Extrai o nick enviado
+        nick = Mensagem(recebidoDoCliente).nickName
 
         #Responde ao cliente após receber o nick
-        cliente.send('Bem-vindo, {}!  Digite \'sair\' para encerrar a conexão!'.format(nick).encode('utf-8'))
+        msgBoasVindas = 'Bem-vindo, {}!  Digite \'q\' para sair!'.format(nick)
+        respostaAoCliente = Mensagem(str(len(msgBoasVindas)), self.HOST_INTERFACE_REDE,
+                                     self.enderecos[cliente][0], 'serv', '', msgBoasVindas)
+        cliente.send(respostaAoCliente.getMensagemCompleta().encode('utf-8'))
 
         #Alerta a todos sobre a conexão
         self.mensBroadcast('{} conectou-se'.format(nick).encode('utf-8'))
 
         #Adiciona o nick ao dicionário de clientes
-        self.clientes[cliente] = nick
+        self.clientes[cliente] = cliente
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
