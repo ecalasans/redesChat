@@ -51,7 +51,7 @@ class ServidorChat:
             print('{}:{} conectou-se!'.format(clienteEndereco[0], clienteEndereco[1]))
 
             #Solicita o nick ao cliente
-            solNick = Mensagem(str(16 + len('Digite seu nick:  ')), self.HOST_INTERFACE_REDE, clienteEndereco[0],
+            solNick = Mensagem(str(16 + len('Digite seu nick, porra:  ')), self.HOST_INTERFACE_REDE, clienteEndereco[0],
                                'serv', 'nick()', 'Digite seu nick:  ')
             clienteSocket.send(solNick.getMensagemCompleta().encode('utf-8'))
 
