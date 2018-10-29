@@ -1,11 +1,38 @@
+import ifaddr
+import ipaddress
 from servidorChat import ServidorChat
 
-lista = [1,2,3,4,5,6,7,8,9]
+'''
+adapters = ifaddr.get_adapters()
+lista = []
 
-print(lista[:-2])
+for adapt in adapters:
+    for objIP in adapt.ips:
+        lista.append(objIP.ip)
 
-texto = "Eric Calasans de Barros"
+for itemIP in lista:
+    if isinstance(itemIP, tuple):
+        continue
+    else:
+        if itemIP.find('127'):
+            print(itemIP)
 
-espaco = zip(texto)
+clientes = {}
+enderecos = {}
 
-print(espaco)
+servidor = ServidorChat(clientes, enderecos)
+
+servidor.onlineServidor()
+
+'''
+
+def imprime():
+    return print('Imprimindo')
+
+
+comando = imprime()
+
+
+
+
+
