@@ -42,6 +42,8 @@ class ServidorChat:
         except:
             msgOnline = "Servidor offline!"
 
+        print(msgOnline)
+
         #Loop onde o servidor maneja as conexões dos clientes, atualizando as listas e
         #requistando o nickname
         while True:

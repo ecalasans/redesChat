@@ -8,10 +8,7 @@ class ClienteChat():
 
     BUFFERSIZE = 1024
 
-    def __init__(self, ip='', nick='', porta=4000, clienteSocket = None):
-        self.ip = ip
-        self.nick = nick
-        self.porta = porta
+    def __init__(self, clienteSocket = None):
         self.clienteSocket = clienteSocket
 
     def solicitaConexao(self, destino, porta):

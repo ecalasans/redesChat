@@ -26,13 +26,11 @@ servidor.onlineServidor()
 
 '''
 
-def imprime():
-    return print('Imprimindo')
+clientes = {}
+enderecos = {}
 
+servidor = ServidorChat(clientes, enderecos)
 
-comando = imprime()
-
-
-
+servidor.onlineServidor()
 
 
