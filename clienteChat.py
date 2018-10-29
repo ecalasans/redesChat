@@ -45,8 +45,7 @@ class ClienteChat():
             try:
                 msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
-                self.tela(msgRecebida)
-                self.executaComando(msgContainer.comando)
+                self.executaComando(msgContainer)
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -56,16 +55,15 @@ class ClienteChat():
     def fechaConexao(self):
         self.clienteSocket.close()
 
-    def tela(self, mensagem):
-        mensTela = Classes.desempacotaMensagem(mensagem)
+    def tela(self, msgContainer):
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
+        return print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
 
 
-    def nick(self, mensagem):
-        msgContainer = Classes.desempacotaMensagem(mensagem)
+    def nick(self, msgContainer):
+        print('Executando comando nick...')
 
         timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
 
@@ -75,6 +73,7 @@ class ClienteChat():
 
         self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
-    def executaComando(self, comando):
-        if str(comando).find('nick'):
-            self.nick()
+    def executaComando(self, msgContainer):
+        if 'nick' in str(msgContainer.comando):
+            self.nick(msgContainer)
+#TODO:  Terminar de implementar a função executaComando
