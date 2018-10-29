@@ -63,6 +63,7 @@ class ServidorChat:
     def manipulaCliente(self, clienteSocket):
         msgContainer = None
         strMensagem = ''
+
         #Recebe o nick do cliente
         recebidoDoCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
