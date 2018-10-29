@@ -1,8 +1,9 @@
 import socket
 import threading
-import ifaddr   #Biblioteca para obter dados dos adaptatores de rede(https://pythonhosted.org/ifaddr/)
+import datetime
 import Classes
-from Classes import Mensagem
+
+
 
 from Classes import Cliente, Mensagem
 
@@ -152,6 +153,13 @@ class ServidorChat:
 
             else:
                 continue
+
+    def tela(self, mensagem):
+        mensTela = Classes.desempacotaMensagem(mensagem)
+
+        timeMensagem = datetime.datetime.now().strftime('%H:%m:%s')
+
+        return print('{}({}) - {}'.format())
 
 
 

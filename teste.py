@@ -17,8 +17,6 @@ for itemIP in lista:
         if itemIP.find('127'):
             print(itemIP)
 
-'''
-
 clientes = {}
 enderecos = {}
 
@@ -26,8 +24,13 @@ servidor = ServidorChat(clientes, enderecos)
 
 servidor.onlineServidor()
 
+'''
+
+def imprime():
+    return print('Imprimindo')
 
 
+comando = imprime()
 
 
 
