@@ -23,7 +23,7 @@ class ClienteChat():
             self.clienteSocket.connect((destino, porta))
 
             strMensagem = '{} solicitando conexão...'.format(Classes.getNetworkIP())
-            msgContainer = Mensagem(str(16 + len(strMensagem)), Classes.getNetworkIP(), destino, '', '', strMensagem)
+            msgContainer = Mensagem(str(16 + len(strMensagem)), Classes.getNetworkIP(), destino, ' ', ' ', strMensagem)
 
             self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
         except ConnectionError:
