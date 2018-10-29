@@ -1,4 +1,4 @@
-import socket
+from socket import *
 import threading
 import Classes
 import datetime
@@ -9,7 +9,7 @@ class ClienteChat():
     BUFFERSIZE = 1024
 
     def __init__(self, clienteSocket = None):
-        self.clienteSocket = clienteSocket
+        self.clienteSocket = socket(AF_INET, SOCK_STREAM)
 
     def solicitaConexao(self, destino, porta):
         msgContainer = None
@@ -19,7 +19,7 @@ class ClienteChat():
         #Cria conexão
         try:
             print('Tentando conexão...')
-            self.clienteSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.clienteSocket = socket(AF_INET, SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
             '''
@@ -64,10 +64,16 @@ class ClienteChat():
         return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
 
 
-    def nick(self):
+    def nick(self, mensagem):
+        msgContainer = Classes.desempacotaMensagem(mensagem)
+
         timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
 
-        return input('{} - Digite seu nick:  '.format(timeMensagem))
+        nick = input('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+
+        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', '')
+
+        self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
     def executaComando(self, comando):
         if str(comando).find('nick'):

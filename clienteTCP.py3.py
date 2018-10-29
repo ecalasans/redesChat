@@ -17,6 +17,7 @@ clientSocket = socket(AF_INET,SOCK_STREAM) # criacao do socket TCP
 clientSocket.connect((serverName, serverPort)) # conecta o socket ao servidor
 
 def runCliente():
+
     sentence = input('Digite o texto em letras minusculas: ')
     clientSocket.send(sentence.encode('utf-8'))  # envia o texto para o servidor
     modifiedSentence = clientSocket.recv(1024)  # recebe do servidor a resposta
