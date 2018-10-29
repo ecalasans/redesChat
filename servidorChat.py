@@ -117,6 +117,8 @@ class ServidorChat:
                 #Segue enviando mensagens para todos os clientes
                 self.mensBroadcast(msgCliente)
 
+                self.tela(msgCliente)
+
 
     def mensBroadcast(self, mensagem):
 
@@ -135,7 +137,7 @@ class ServidorChat:
     def lista(self):
         return list(self.clientes.values())
 
-    def nome(self, nick, ipCliente):
+    def nick(self, nick, ipCliente):
         #Varre os enderecos procurando o socket do cliente
         for socCliente, enderecoCliente in self.enderecos.items():
 
@@ -157,9 +159,9 @@ class ServidorChat:
     def tela(self, mensagem):
         mensTela = Classes.desempacotaMensagem(mensagem)
 
-        timeMensagem = datetime.datetime.now().strftime('%H:%m:%s')
+        timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        return print('{}({}) - {}'.format())
+        return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
 
 
 
