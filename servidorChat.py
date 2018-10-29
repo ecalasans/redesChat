@@ -35,7 +35,7 @@ class ServidorChat:
 
 
         #Coloca o servidor em modo de escuta
-        servSocket.listen(10000)  #Máximo de 100 conexões
+        servSocket.listen(10000)  #Máximo de 10000 conexões para simular infinitas conexãoes
         msgOnline = "Servidor online!\nSala Geral aberta e esperando conexões na porta %d" % (self.PORTA_SERVIDOR)
         print(msgOnline)
 
@@ -58,6 +58,8 @@ class ServidorChat:
 
 
     def manipulaCliente(self, cliente):
+        msgContainer = None
+        strMensagem = ''
         #Recebe o nick do cliente
         recebidoDoCliente = cliente.recv(self.BUFFERSIZE).decode('utf-8')
 
@@ -65,13 +67,16 @@ class ServidorChat:
         nick = Classes.desempacotaMensagem(recebidoDoCliente).nickName
 
         #Responde ao cliente após receber o nick
-        msgBoasVindas = 'Bem-vindo, {}!  Digite \'q\' para sair!'.format(nick)
-        respostaAoCliente = Mensagem(str(len(msgBoasVindas)), self.HOST_INTERFACE_REDE,
-                                     self.enderecos[cliente][0], 'serv', 'p', msgBoasVindas)
-        cliente.send(respostaAoCliente.getMensagemCompleta().encode('utf-8'))
+        strMensagem = 'Bem-vindo, {}!  Digite \'q\' para sair!'.format(nick)
+        msgContainer = Mensagem(str(len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                     self.enderecos[cliente][0], 'serv', 'p', strMensagem)
+        cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
         #Alerta a todos sobre a conexão
-        self.mensBroadcast('{} conectou-se'.format(nick), nick)
+        strMensagem = '{} conectou-se'.format(nick)
+        msgContainer = Mensagem(str(len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                     self.enderecos[cliente][0], 'serv', 'p', strMensagem)
+        self.mensBroadcast(msgContainer)
 
         #Adiciona o nick ao dicionário de clientes
         self.clientes[cliente] = cliente
@@ -84,9 +89,12 @@ class ServidorChat:
             msgCliente = Classes.desempacotaMensagem(msgCliente)
 
             #Se o comando for sair, encerra a conexão e avisa a todos
-            if msgCliente.comando == 's':
+            if msgCliente.comando == 'q':
                 #Envia comando para ser tratado do lado do cliente
-                cliente.send('s'.encode('utf-8'))
+                strMensagem = 'Servidor enviou o comando \'q\''
+                msgContainer = Mensagem(str(len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                        self.enderecos[cliente][0], 'serv', 'q', strMensagem)
+                cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
                 #Desconecta o cliente
                 cliente.close()
@@ -95,19 +103,30 @@ class ServidorChat:
                 del self.clientes[cliente]
 
                 #Avisa aos demais clientes da desconexão
-                self.mensBroadcast('{} desconectou-se!'.format(nick), nick)
+                strMensagem = '{} desconectou-se!'.format(nick)
+                msgContainer = Mensagem(str(len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                        self.enderecos[cliente][0], 'serv', 'q', strMensagem)
+                self.mensBroadcast(msgContainer)
 
                 #Sai do loop
                 break
             else:
                 #Segue enviando mensagens para todos os clientes
-                self.mensBroadcast(msgCliente,nick)
+                self.mensBroadcast(msgCliente)
 
 
-    def mensBroadcast(self, mensagem, nick):
-        #Varre o dicionáriio de clientes e manda a mensagem para todos
+    def mensBroadcast(self, mensagem):
+
+        objMensagem = Classes.desempacotaMensagem(mensagem)
+
+        strMensagem =  "{} - {}".format(objMensagem.nickName, objMensagem.mensagem)
+
+        msgContainer = Mensagem(str(len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                        objMensagem.ipDestino, 'serv', 'p', strMensagem)
+
+        #Varre o dicionário de clientes e manda a mensagem para todos
         for cliente in self.clientes:
-            cliente.send("{} - {}".format(nick, mensagem).encode('utf-8'))
+            cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
 
