@@ -22,10 +22,12 @@ class ClienteChat():
             self.clienteSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
+            '''
             strMensagem = '{} solicitando conexão...'.format(Classes.getNetworkIP())
             msgContainer = Mensagem(str(16 + len(strMensagem)), Classes.getNetworkIP(), destino, ' ', ' ', strMensagem)
 
             self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+            '''
         except ConnectionError:
             print('Falha na conexão!')
 
@@ -42,7 +44,9 @@ class ClienteChat():
         while True:
             try:
                 msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
+                msgContainer = Classes.desempacotaMensagem(msgRecebida)
                 self.tela(msgRecebida)
+                self.executaComando(msgContainer.comando)
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -58,3 +62,13 @@ class ClienteChat():
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
         return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
+
+
+    def nick(self):
+        timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
+
+        return input('{} - Digite seu nick:  '.format(timeMensagem))
+
+    def executaComando(self, comando):
+        if str(comando).find('nick'):
+            self.nick()

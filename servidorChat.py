@@ -52,7 +52,7 @@ class ServidorChat:
 
             #Solicita o nick ao cliente
             solNick = Mensagem(str(16 + len('Digite seu nick:  ')), self.HOST_INTERFACE_REDE, clienteEndereco[0],
-                               'serv', 'tela()', 'Digite seu nick:  ')
+                               'serv', 'nick()', 'Digite seu nick:  ')
             clienteSocket.send(solNick.getMensagemCompleta().encode('utf-8'))
 
             #Adiciona o endereco e porta do cliente ao dicionário
