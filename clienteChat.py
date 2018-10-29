@@ -12,11 +12,20 @@ class ClienteChat():
         self.clienteSocket = clienteSocket
 
     def solicitaConexao(self, destino, porta):
+        msgContainer = None
+        strMensagem = ''
+
+
         #Cria conexão
         try:
             print('Tentando conexão...')
             self.clienteSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
+
+            strMensagem = '{} solicitando conexão...'.format(Classes.getNetworkIP())
+            msgContainer = Mensagem(str(16 + len(strMensagem)), Classes.getNetworkIP(), destino, '', '', strMensagem)
+
+            self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
         except ConnectionError:
             print('Falha na conexão!')
 
