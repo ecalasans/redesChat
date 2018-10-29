@@ -1,5 +1,12 @@
-from servidorChat import ServidorChat
+from tkinter import *
 
-servidor = ServidorChat('')
-print(servidor.clientes)
-servidor.abreSala(servidor.clientes, "2000")
+class Tela:
+    def __init__(self, master=None):
+        self.widget1 = Frame(master)
+        self.widget1.pack()
+        self.msg = Label(self.widget1, text="Primeiro widget")
+        self.msg.pack()
+
+root = Tk()
+Tela(root)
+root.mainloop()
