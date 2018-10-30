@@ -10,6 +10,7 @@ class ClienteChat():
 
     def __init__(self, clienteSocket = None):
         self.clienteSocket = socket(AF_INET, SOCK_STREAM)
+        self.nickName = ''
 
     def solicitaConexao(self, destino, porta):
         msgContainer = None
@@ -40,12 +41,21 @@ class ClienteChat():
         msgContainer = None
         strMensagem = ''
 
+        dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
         #Loop infinito para ficar recebendo as mensagens
         while True:
             try:
                 msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
                 self.executaComando(msgContainer)
+
+                msgAEnviar = input('({}) - '.format(dataHora))
+
+                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                                        self.nickName, 'tela()', msgAEnviar)
+
+                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -66,6 +76,8 @@ class ClienteChat():
         timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
 
         nick = input('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+
+        self.nickName = nick
 
         resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', '')
 
