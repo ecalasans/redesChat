@@ -94,11 +94,6 @@ class ServidorChat:
 
             objMensagem = Classes.desempacotaMensagem(msgCliente)
 
-            if 'priv' not in objMensagem.comando :
-                self.tela(msgCliente)
-                self.mensBroadcast(msgCliente)
-
-
             '''
             #Se o comando for sair, encerra a conexão e avisa a todos
             if msgCliente.comando == 'q':
@@ -178,7 +173,7 @@ class ServidorChat:
                 msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                     enderecoCliente[0], 'serv', 'tela()', strMensagem)
 
-                self.mensBroadcast(msgContainer)
+                self.mensBroadcast(msgContainer.getMensagemCompleta())
 
             else:
                 continue
@@ -203,6 +198,19 @@ class ServidorChat:
 
 
 
+    #Seleciona e executa os comandos vindos do cliente
+    def executaComandos(self, mensagem):
+
+        msgContainer = Classes.desempacotaMensagem(mensagem)
+
+        if 'tela' in msgContainer.comando:
+            self.tela(mensagem)
+
+        if msgContainer.mensagem.find('nick') != -1:
+            self.nick(msgContainer.nickName, msgContainer.ipOrigem)
+
+        if msgContainer.mensagem.find('lista') != -1:
+            self.lista(msgContainer.nickName)
 
 
 
