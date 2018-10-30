@@ -83,10 +83,12 @@ class ServidorChat:
         strMensagem = '{} conectou-se'.format(nick)
         msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                      self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
+
+        # Adiciona o nick ao dicionário de clientes
+        self.clientes[clienteSocket] = nick
+
         self.mensBroadcast(msgContainer)
 
-        #Adiciona o nick ao dicionário de clientes
-        self.clientes[clienteSocket] = nick
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
@@ -126,17 +128,17 @@ class ServidorChat:
 
     def mensBroadcast(self, mensagem):
 
-        objMensagem = Classes.desempacotaMensagem(mensagem)
+        #objMensagem = Classes.desempacotaMensagem(mensagem)
 
-        strMensagem = "{} - {}".format(objMensagem.nickName, objMensagem.mensagem)
+        strMensagem = "{} - {}".format(mensagem.nickName, mensagem.mensagem)
 
         msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                        objMensagem.ipDestino, 'serv', 'tela()', strMensagem)
+                                        mensagem.ipDestino, 'serv', 'tela()', strMensagem)
 
         #Varre o dicionário de clientes e manda a mensagem para todos
         for cliente in self.clientes:
             cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-
+#TODO: PEGAR A KEY DE CLIENTES
 
     def lista(self, nick):
         strClientes = ''
