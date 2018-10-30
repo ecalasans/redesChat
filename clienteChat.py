@@ -51,10 +51,7 @@ class ClienteChat():
             except OSError:
                 break
 
-
-    def fechaConexao(self):
-        self.clienteSocket.close()
-
+    #Comando vindo do servidor para imprimir mensagens na tela
     def tela(self, msgContainer):
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
@@ -62,6 +59,7 @@ class ClienteChat():
         return print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
 
 
+    #Comando vindo do servidor para fornecer o nick
     def nick(self, msgContainer):
         print('Executando comando nick...')
 
@@ -73,7 +71,14 @@ class ClienteChat():
 
         self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
+
+
     def executaComando(self, msgContainer):
-        if 'nick' in str(msgContainer.comando):
+        if 'nick' in msgContainer.comando:
             self.nick(msgContainer)
-#TODO:  Terminar de implementar a função executaComando
+
+        if 'tela' in msgContainer.comando:
+            self.tela(msgContainer)
+
+        if 'sair' in msgContainer.comando:
+            self.clienteSocket.close()

@@ -92,9 +92,14 @@ class ServidorChat:
         while True:
             msgCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
-            #Transforma string em
-            msgCliente = Classes.desempacotaMensagem(msgCliente)
+            objMensagem = Classes.desempacotaMensagem(msgCliente)
 
+            if 'priv' not in objMensagem.comando :
+                self.tela(msgCliente)
+                self.mensBroadcast(msgCliente)
+
+
+            '''
             #Se o comando for sair, encerra a conexão e avisa a todos
             if msgCliente.comando == 'q':
                 #Envia comando para ser tratado do lado do cliente
@@ -122,7 +127,7 @@ class ServidorChat:
                 self.mensBroadcast(msgCliente)
 
                 self.tela(msgCliente)
-
+            '''
 
     def mensBroadcast(self, mensagem):
 
@@ -138,8 +143,26 @@ class ServidorChat:
             cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
-    def lista(self):
-        return list(self.clientes.values())
+    def lista(self, nick):
+        strClientes = ''
+
+        destino = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        for key, value in self.clientes.items():
+            if value == nick:
+                destino = key
+
+        for cliente in self.clientes.values():
+            strClientes = strClientes + '{}_'.format(cliente)
+
+        strMensagem = strClientes
+
+        destinoIP = self.enderecos[destino][0]
+
+        msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                destinoIP, 'serv', 'lista()', strMensagem)
+
+        destino.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     def nick(self, nick, ipCliente):
         #Varre os enderecos procurando o socket do cliente
@@ -168,6 +191,15 @@ class ServidorChat:
         return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
 
 
+    #Encerra a conexão de todos os clientes
+    def sair(self):
+
+        strMensagem = 'Servidor encerrado!  Você foi desconectado'
+
+        for cliente in self.enderecos.items():
+            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                    cliente[0], 'serv', 'tela()', strMensagem)
+            cliente[0].close()
 
 
 
