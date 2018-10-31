@@ -87,14 +87,18 @@ class ServidorChat:
         # Adiciona o nick ao dicionário de clientes
         self.clientes[clienteSocket] = nick
 
+        # Alerta a todos sobre a conexão do cliente
         self.mensBroadcast(msgContainer)
-
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
             msgCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
             objMensagem = Classes.desempacotaMensagem(msgCliente)
+
+            self.mensBroadcast(msgContainer)
+
+            #todo:  CONTINUAR AQUI
 
             '''
             #Se o comando for sair, encerra a conexão e avisa a todos
