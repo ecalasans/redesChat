@@ -50,13 +50,6 @@ class ClienteChat():
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
                 self.executaComando(msgContainer)
 
-                msgAEnviar = input('({}) - '.format(dataHora))
-
-                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
-                                        self.nickName, 'tela()', msgAEnviar)
-
-                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-
             #Caso o cliente tenha desconectado do chat
             except OSError:
                 break
@@ -67,6 +60,13 @@ class ClienteChat():
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
         return print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+
+        msgAEnviar = input('({}) - '.format(dataHora))
+
+        msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                            self.nickName, 'tela()', msgAEnviar)
+
+        self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
     #Comando vindo do servidor para fornecer o nick

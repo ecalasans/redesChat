@@ -136,9 +136,10 @@ class ServidorChat:
                                         mensagem.ipDestino, 'serv', 'tela()', strMensagem)
 
         #Varre o dicionário de clientes e manda a mensagem para todos
-        for cliente in self.clientes:
-            cliente.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-#TODO: PEGAR A KEY DE CLIENTES
+        for clienteSock, clienteNick in self.clientes.items():
+            print(type(clienteSock))
+            clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+
 
     def lista(self, nick):
         strClientes = ''
