@@ -1,5 +1,5 @@
 from socket import *
-import threading
+from threading import Thread
 import Classes
 import datetime
 from Classes import Mensagem
@@ -44,7 +44,7 @@ class ClienteChat():
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
 
                 #Lança uma thread para ouvir as mensagens do servidor e printar na tela
-                thOuveServidor = threading.Thread(target=self.executaComando(),
+                thOuveServidor = Thread(target=self.executaComando(),
                                                   args=(msgContainer,), daemon=True).start()
 
                 #Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
@@ -54,6 +54,7 @@ class ClienteChat():
                                         self.nickName, 'tela()', msgAEnviar)
 
                 self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
