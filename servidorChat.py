@@ -128,9 +128,7 @@ class ServidorChat:
 
     def mensBroadcast(self, mensagem):
 
-        #objMensagem = Classes.desempacotaMensagem(mensagem)
-
-        strMensagem = "{} - {}".format(mensagem.nickName, mensagem.mensagem)
+        strMensagem = "- {}".format(mensagem.mensagem)
 
         msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                         mensagem.ipDestino, 'serv', 'tela()', strMensagem)

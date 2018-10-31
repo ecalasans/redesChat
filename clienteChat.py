@@ -23,12 +23,6 @@ class ClienteChat():
             self.clienteSocket = socket(AF_INET, SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
-            '''
-            strMensagem = '{} solicitando conexão...'.format(Classes.getNetworkIP())
-            msgContainer = Mensagem(str(16 + len(strMensagem)), Classes.getNetworkIP(), destino, ' ', ' ', strMensagem)
-
-            self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-            '''
         except ConnectionError:
             print('Falha na conexão!')
 
@@ -48,7 +42,18 @@ class ClienteChat():
             try:
                 msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
-                self.executaComando(msgContainer)
+
+                #Lança uma thread para ouvir as mensagens do servidor e printar na tela
+                thOuveServidor = threading.Thread(target=self.executaComando(),
+                                                  args=(msgContainer,), daemon=True).start()
+
+                #Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
+                msgAEnviar = input('({}) - '.format(dataHora))
+
+                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                                        self.nickName, 'tela()', msgAEnviar)
+
+                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -60,13 +65,6 @@ class ClienteChat():
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
         return print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
-
-        msgAEnviar = input('({}) - '.format(dataHora))
-
-        msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
-                            self.nickName, 'tela()', msgAEnviar)
-
-        self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
     #Comando vindo do servidor para fornecer o nick
