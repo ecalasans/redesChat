@@ -44,7 +44,7 @@ class ClienteChat():
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
 
                 #Lança uma thread para ouvir as mensagens do servidor e printar na tela
-                thOuveServidor = Thread(target=self.executaComando(),
+                thOuveServidor = Thread(target=self.executaComando,
                                                   args=(msgContainer,), daemon=True).start()
 
                 #Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
