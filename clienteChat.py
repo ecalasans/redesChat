@@ -46,9 +46,16 @@ class ClienteChat():
                 #Se chegar mensagem lança a thread
                 if msgContainer != None:
                     #Lança uma thread para ouvir as mensagens do servidor e printar na tela
-                    thEnviaMensagem = Thread(target=self.enviaMensagem, args=(msgContainer, ), daemon=True).start()
+                    thOuveMensagem = Thread(target=self.executaComando, args=(msgContainer, ), daemon=True)
+                    thOuveMensagem.start()
 
-                self.executaComando(msgContainer)
+                # Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
+                msgAEnviar = input('({}) - '.format(dataHora))
+
+                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                                            self.nickName, 'tela()', msgAEnviar)
+
+                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -59,7 +66,7 @@ class ClienteChat():
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        return print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+        print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
 
 
     #Comando vindo do servidor para fornecer o nick
@@ -80,13 +87,7 @@ class ClienteChat():
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-        # Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
-        msgAEnviar = input('({}) - '.format(dataHora))
 
-        msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
-                                self.nickName, 'tela()', msgAEnviar)
-
-        self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     def executaComando(self, msgContainer):
         if 'nick' in msgContainer.comando:
