@@ -87,8 +87,6 @@ class ClienteChat():
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-
-
     def executaComando(self, msgContainer):
         if 'nick' in msgContainer.comando:
             self.nick(msgContainer)
