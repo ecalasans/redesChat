@@ -104,11 +104,11 @@ class ServidorChat:
 
         strMensagem = "- {}".format(mensagem.mensagem)
 
-        msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                        mensagem.ipDestino, 'serv', 'tela()', strMensagem)
 
         #Varre o dicionário de clientes e manda a mensagem para todos
         for clienteSock, clienteNick in self.clientes.items():
+            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                    self.enderecos[clienteSock][0], 'serv', 'tela()', strMensagem)
             print(type(clienteSock))
             clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
