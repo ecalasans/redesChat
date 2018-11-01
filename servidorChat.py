@@ -37,7 +37,7 @@ class ServidorChat:
 
         #Coloca o servidor em modo de escuta
         try:
-            servSocket.listen(10000)  #Máximo de 10000 conexões para simular infinitas conexãoes
+            servSocket.listen(5)  #Máximo de 10000 conexões para simular infinitas conexãoes
             msgOnline = "Servidor online e esperando conexões na porta %d" % (self.PORTA_SERVIDOR)
         except:
             msgOnline = "Servidor offline!"
@@ -48,6 +48,7 @@ class ServidorChat:
         #requistando o nickname
         while True:
             clienteSocket, clienteEndereco = servSocket.accept()
+
             print('{}:{} conectou-se!'.format(clienteEndereco[0], clienteEndereco[1]))
 
             #Solicita o nick ao cliente
@@ -98,37 +99,6 @@ class ServidorChat:
 
             self.mensBroadcast(msgContainer)
 
-            #todo:  CONTINUAR AQUI
-
-            '''
-            #Se o comando for sair, encerra a conexão e avisa a todos
-            if msgCliente.comando == 'q':
-                #Envia comando para ser tratado do lado do cliente
-                strMensagem = 'Servidor enviou o comando \'sair()\''
-                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                        self.enderecos[clienteSocket][0], 'serv', 'sair()', strMensagem)
-                clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-
-                #Desconecta o cliente
-                clienteSocket.close()
-
-                #Remove do dicionário de clientes
-                del self.clientes[clienteSocket]
-
-                #Avisa aos demais clientes da desconexão
-                strMensagem = '{} desconectou-se!'.format(nick)
-                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                        self.enderecos[clienteSocket][0], 'serv', 'sair()', strMensagem)
-                self.mensBroadcast(msgContainer)
-
-                #Sai do loop
-                break
-            else:
-                #Segue enviando mensagens para todos os clientes
-                self.mensBroadcast(msgCliente)
-
-                self.tela(msgCliente)
-            '''
 
     def mensBroadcast(self, mensagem):
 
