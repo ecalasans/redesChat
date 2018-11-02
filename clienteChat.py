@@ -28,31 +28,26 @@ class ClienteChat():
             print('Falha na conexão!')
 
         while True:
-            self.recebeMensagem()
+            # Recebe a primeira mensagem e verifica se é pra digitar o nick
+            msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
+
+            msgContainer = Classes.desempacotaMensagem(msgRecebida)
+
+            if msgContainer.comando.find('nick') != -1:  # Se o comando for nick
+                self.executaComando(msgContainer)
+            else:
+                self.manipulaMensagem(msgContainer)
 
 
     #Recebe a mensagem do servidor e printa na tela
-    def recebeMensagem(self):
-        msgContainer = None
-        strMensagem = ''
-
+    def manipulaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-        #Loop infinito para ficar recebendo as mensagens
-        while True:
-            try:
-                msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
+        self.executaComando(msgContainer)
 
-                msgContainer = Classes.desempacotaMensagem(msgRecebida)
+        thAEnviar = Thread(target=self.enviaMensagem, args=(msgContainer,), daemon=True)
+        thAEnviar.start()
 
-                thEnviarMensagem = Thread(target=self.enviaMensagem, args=(msgContainer,), daemon=True)
-                thEnviarMensagem.start()
-
-                self.executaComando(msgContainer)
-
-            #Caso o cliente tenha desconectado do chat
-            except OSError:
-                break
 
     #Comando vindo do servidor para imprimir mensagens na tela
     def tela(self, msgContainer):
@@ -61,7 +56,6 @@ class ClienteChat():
 
         print('{}\n'.format(msgContainer.mensagem))
 
-        #todo:  Testar servidor
 
     #Comando vindo do servidor para fornecer o nick
     def nick(self, msgContainer):
@@ -81,7 +75,7 @@ class ClienteChat():
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-        msgAEnviar = input('({}) - '.format(dataHora))
+        msgAEnviar = input('')
 
         msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
                                 self.nickName, 'tela()', msgAEnviar)
