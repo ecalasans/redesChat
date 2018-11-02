@@ -79,7 +79,7 @@ class ClienteChat():
 
         self.nickName = nick
 
-        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', '')
+        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', nick)
 
         self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
