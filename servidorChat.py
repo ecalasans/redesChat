@@ -96,7 +96,7 @@ class ServidorChat:
         while True:
             msgCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
-            objMensagem = Classes.desempacotaMensagem(msgCliente)
+            self.tela(msgCliente)
 
             self.mensBroadcast(msgContainer)
 
@@ -113,26 +113,24 @@ class ServidorChat:
             clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
-    def lista(self, nick):
+    def lista(self, mensagem):
         strClientes = ''
 
-        destino = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        solicitante = mensagem.nickName
 
-        for key, value in self.clientes.items():
-            if value == nick:
-                destino = key
+        # Procura na lista de nicks o socket correspondente
+        for clienteSock, clienteNick in self.clientes.items():
+            if clienteNick == solicitante:
+                socketSolicitante = clienteSock
 
-        for cliente in self.clientes.values():
-            strClientes = strClientes + '{}_'.format(cliente)
+            strClientes = clienteNick + '_' + strClientes
 
-        strMensagem = strClientes
+        listaClientes = Mensagem(16 + len(strClientes), self.HOST_INTERFACE_REDE, self.enderecos[socketSolicitante][0],
+                                 'serv', 'lista()', strClientes)
 
-        destinoIP = self.enderecos[destino][0]
+        socketSolicitante.send(listaClientes.getMensagemCompleta().encode('utf-8'))
 
-        msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                destinoIP, 'serv', 'lista()', strMensagem)
 
-        destino.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     def nick(self, nick, ipCliente):
         #Varre os enderecos procurando o socket do cliente
