@@ -193,7 +193,7 @@ class ServidorChat:
             self.nick(msgContainer.nickName, msgContainer.ipOrigem)
 
         if msgContainer.mensagem.find('lista') != -1:
-            self.lista(msgContainer.nickName)
+            self.lista(mensagem)
 
 
 
