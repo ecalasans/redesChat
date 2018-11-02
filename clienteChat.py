@@ -27,26 +27,29 @@ class ClienteChat():
         except ConnectionError:
             print('Falha na conexão!')
 
+        thOuvir = Thread(target=self.ouveMensagem, daemon=True)
+        thOuvir.start()
+
+        while True:
+            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+            msgAEnviar = input('{} - '.format(dataHora))
+
+            msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), destino,
+                                    self.nickName, 'tela()', msgAEnviar)
+
+            self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+
+            #todo:  Testar isso aqui
+    #Recebe a mensagem do servidor e printa na tela
+    def ouveMensagem(self):
         while True:
             # Recebe a primeira mensagem e verifica se é pra digitar o nick
             msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
             msgContainer = Classes.desempacotaMensagem(msgRecebida)
 
-            if msgContainer.comando.find('nick') != -1:  # Se o comando for nick
-                self.executaComando(msgContainer)
-            else:
-                self.manipulaMensagem(msgContainer)
-
-
-    #Recebe a mensagem do servidor e printa na tela
-    def manipulaMensagem(self, msgContainer):
-        dataHora = datetime.datetime.now().strftime('%H:%m:%S')
-
-        self.executaComando(msgContainer)
-
-        thAEnviar = Thread(target=self.enviaMensagem, args=(msgContainer,), daemon=True)
-        thAEnviar.start()
+            self.executaComando(msgContainer)
 
 
     #Comando vindo do servidor para imprimir mensagens na tela
@@ -75,7 +78,7 @@ class ClienteChat():
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-        msgAEnviar = input('')
+        msgAEnviar = input('{} - '.format(dataHora))
 
         msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
                                 self.nickName, 'tela()', msgAEnviar)

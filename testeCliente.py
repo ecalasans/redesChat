@@ -2,4 +2,4 @@ from clienteChat import ClienteChat
 
 cli = ClienteChat()
 
-cli.solicitaConexao('192.168.1.53', 2018)
+cli.solicitaConexao('192.168.7.14', 2018)
