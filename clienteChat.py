@@ -3,6 +3,7 @@ from threading import Thread
 import Classes
 import datetime
 from Classes import Mensagem
+import time
 
 class ClienteChat():
 
@@ -41,21 +42,13 @@ class ClienteChat():
         while True:
             try:
                 msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
+
                 msgContainer = Classes.desempacotaMensagem(msgRecebida)
 
-                #Se chegar mensagem lança a thread
-                if msgContainer != None:
-                    #Lança uma thread para ouvir as mensagens do servidor e printar na tela
-                    thOuveMensagem = Thread(target=self.executaComando, args=(msgContainer, ), daemon=True)
-                    thOuveMensagem.start()
+                thEnviarMensagem = Thread(target=self.enviaMensagem, args=(msgContainer,), daemon=True)
+                thEnviarMensagem.start()
 
-                # Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
-                msgAEnviar = input('({}) - '.format(dataHora))
-
-                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
-                                            self.nickName, 'tela()', msgAEnviar)
-
-                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+                self.executaComando(msgContainer)
 
             #Caso o cliente tenha desconectado do chat
             except OSError:
@@ -66,8 +59,9 @@ class ClienteChat():
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+        print('{}\n'.format(msgContainer.mensagem))
 
+        #todo:  Testar servidor
 
     #Comando vindo do servidor para fornecer o nick
     def nick(self, msgContainer):
@@ -86,6 +80,13 @@ class ClienteChat():
 
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+        msgAEnviar = input('({}) - '.format(dataHora))
+
+        msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                                self.nickName, 'tela()', msgAEnviar)
+
+        self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     def executaComando(self, msgContainer):
         if 'nick' in msgContainer.comando:

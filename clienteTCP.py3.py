@@ -11,8 +11,8 @@ from socket import *
 import threading
 
 # definicao das variaveis
-serverName = '192.168.1.11' # ip do servidor
-serverPort = 12000 # porta a se conectar
+serverName = '192.168.1.53' # ip do servidor
+serverPort = 2018 # porta a se conectar
 clientSocket = socket(AF_INET,SOCK_STREAM) # criacao do socket TCP
 clientSocket.connect((serverName, serverPort)) # conecta o socket ao servidor
 
