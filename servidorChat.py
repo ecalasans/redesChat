@@ -73,24 +73,26 @@ class ServidorChat:
         #Extrai o nick enviado
         nick = Classes.desempacotaMensagem(recebidoDoCliente).nickName
 
-        #Verifica se o nick está cadastrado
-        if self.validaNick(nick) == True:
-            #Responde ao cliente após receber o nick
-            strMensagem = 'Bem-vindo, {}!  Digite \'sair()\' para sair!'.format(nick)
-            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                         self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
-            clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+        # Se o nick não estiver cadastrado, dá as boas-vindas
+        if nick not in self.clientes[clienteSocket][1]:
+            # Verifica se o nick está cadastrado
+            if self.validaNick(nick) == True:
+                # Responde ao cliente após receber o nick
+                strMensagem = 'Bem-vindo, {}!  Digite \'sair()\' para sair!'.format(nick)
+                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                        self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
+                clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
-            #Alerta a todos sobre a conexão
-            strMensagem = '{} conectou-se'.format(nick)
-            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                         self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
+                # Alerta a todos sobre a conexão
+                strMensagem = '{} conectou-se'.format(nick)
+                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                        self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
 
-            # Adiciona o nick ao dicionário de clientes
-            self.clientes[clienteSocket] = nick
+                # Adiciona o nick ao dicionário de clientes
+                self.clientes[clienteSocket] = nick
 
-            # Alerta a todos sobre a conexão do cliente
-            self.mensBroadcast(msgContainer)
+                # Alerta a todos sobre a conexão do cliente
+                self.mensBroadcast(msgContainer)
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
