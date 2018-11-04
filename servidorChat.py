@@ -91,13 +91,13 @@ class ServidorChat:
             self.clientes[clienteSocket] = nick
 
             # Avisa a todos da conexão
-            self.mensBroadcast(msgContainer)
+            self.mensBroadcast(msgContainer, nick)
 
         else:
             msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                     self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
 
-            self.mensBroadcast(msgContainer)
+            self.mensBroadcast(msgContainer, nick)
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
@@ -110,22 +110,21 @@ class ServidorChat:
 
             self.tela(msgCliente)
 
-            self.mensBroadcast(msgContainer)
+            self.mensBroadcast(msgContainer, nick)
 
 
-    def mensBroadcast(self, mensagem):
+    def mensBroadcast(self, mensagem, nick):
 
-        strMensagem = "{} escreveu: {}".format(mensagem.mensagem)
+        strMensagem = "(serv) - {} escreveu: {}".format(nick, mensagem.mensagem)
 
         #Varre o dicionário de clientes e manda a mensagem para todos
         for clienteSock, clienteNick in self.clientes.items():
-            if clienteSock == self.clientes[clienteSock][0]:
+            if clienteNick == nick:
                 continue
-
-            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+            else:
+                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                     self.enderecos[clienteSock][0], 'serv', 'tela()', strMensagem)
-            print(type(clienteSock))
-            clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+                clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
 
     def lista(self, mensagem):
@@ -171,7 +170,7 @@ class ServidorChat:
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        return print('{}({}) - {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
+        return print('{} - {} escreveu: {}'.format(timeMensagem, mensTela.nickName, mensTela.mensagem))
 
 
     #Encerra a conexão de todos os clientes
