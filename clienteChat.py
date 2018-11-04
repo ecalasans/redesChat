@@ -61,7 +61,7 @@ class ClienteChat():
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        print('{}\n'.format(msgContainer.mensagem))
+        print('{} escreveu {}\n'.format(msgContainer.nickName, msgContainer.mensagem))
 
 
     #Comando vindo do servidor para fornecer o nick

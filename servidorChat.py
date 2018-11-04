@@ -73,30 +73,40 @@ class ServidorChat:
         #Extrai o nick enviado
         nick = Classes.desempacotaMensagem(recebidoDoCliente).nickName
 
-        # Se o nick não estiver cadastrado, dá as boas-vindas
-        if nick not in self.clientes[clienteSocket][1]:
-            # Verifica se o nick está cadastrado
-            if self.validaNick(nick) == True:
-                # Responde ao cliente após receber o nick
-                strMensagem = 'Bem-vindo, {}!  Digite \'sair()\' para sair!'.format(nick)
-                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+
+        # Verifica se o nick está cadastrado
+        if self.validaNick(nick) == True:
+            # Responde ao cliente após receber o nick
+            strMensagem = 'Bem-vindo, {}!  Digite \'sair()\' para sair!'.format(nick)
+            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                         self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
-                clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+            clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
-                # Alerta a todos sobre a conexão
-                strMensagem = '{} conectou-se'.format(nick)
-                msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+            # Alerta a todos sobre a conexão
+            strMensagem = '{} conectou-se'.format(nick)
+            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                         self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
 
-                # Adiciona o nick ao dicionário de clientes
-                self.clientes[clienteSocket] = nick
+            # Adiciona o nick ao dicionário de clientes
+            self.clientes[clienteSocket] = nick
 
-                # Alerta a todos sobre a conexão do cliente
-                self.mensBroadcast(msgContainer)
+            # Avisa a todos da conexão
+            self.mensBroadcast(msgContainer)
+
+        else:
+            msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
+                                    self.enderecos[clienteSocket][0], 'serv', 'tela()', strMensagem)
+
+            self.mensBroadcast(msgContainer)
 
         #Loop para transmissão das mensagens para todos os clientes
         while True:
             msgCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
+
+            objMsgCliente = Classes.desempacotaMensagem(msgCliente)
+
+            msgContainer = Mensagem(str(16 + len(msgCliente)), self.HOST_INTERFACE_REDE,
+                                    self.enderecos[clienteSocket][0], 'serv', 'tela()', objMsgCliente.mensagem)
 
             self.tela(msgCliente)
 
@@ -105,10 +115,13 @@ class ServidorChat:
 
     def mensBroadcast(self, mensagem):
 
-        strMensagem = "- {}".format(mensagem.mensagem)
+        strMensagem = "{} escreveu: {}".format(mensagem.mensagem)
 
         #Varre o dicionário de clientes e manda a mensagem para todos
         for clienteSock, clienteNick in self.clientes.items():
+            if clienteSock == self.clientes[clienteSock][0]:
+                continue
+
             msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
                                     self.enderecos[clienteSock][0], 'serv', 'tela()', strMensagem)
             print(type(clienteSock))
@@ -172,16 +185,19 @@ class ServidorChat:
             cliente[0].close()
 
     def validaNick(self, nick):
+        valido = False
         for clienteSock, nickName in self.clientes.items():
             if nickName == nick:
                 strMensagem = 'Esse nick já está cadastrado.\n'
                 msgContainer = Mensagem(16 + len(strMensagem), self.HOST_INTERFACE_REDE,
                                         self.enderecos[clienteSock][0], 'serv', 'nick()', strMensagem)
                 clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-                return False
+                valido = False
+                break
             else:
                 continue
-        return True
+        valido = True
+        return valido
 
     #Seleciona e executa os comandos vindos do cliente
     def executaComandos(self, mensagem):
