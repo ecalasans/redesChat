@@ -3,6 +3,7 @@ from threading import Thread
 import Classes
 import datetime
 from Classes import Mensagem
+import time
 
 class ClienteChat():
 
@@ -23,50 +24,44 @@ class ClienteChat():
             self.clienteSocket = socket(AF_INET, SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
+            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+            self.nickName = input('{} - Digite seu nick:'.format(dataHora))
+
         except ConnectionError:
             print('Falha na conexão!')
 
-        while True:
-            self.recebeMensagem()
 
+        thOuvir = Thread(target=self.ouveMensagem, daemon=True)
+        thOuvir.start()
+
+        while True:
+            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+            msgAEnviar = input('{} - '.format(dataHora))
+
+            msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), destino,
+                                    self.nickName, 'tela()', msgAEnviar)
+
+            self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     #Recebe a mensagem do servidor e printa na tela
-    def recebeMensagem(self):
-        msgContainer = None
-        strMensagem = ''
-
-        dataHora = datetime.datetime.now().strftime('%H:%m:%S')
-
-        #Loop infinito para ficar recebendo as mensagens
+    def ouveMensagem(self):
         while True:
-            try:
-                msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
-                msgContainer = Classes.desempacotaMensagem(msgRecebida)
+            # Recebe a primeira mensagem e verifica se é pra digitar o nick
+            msgRecebida = self.clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
-                #Se chegar mensagem lança a thread
-                if msgContainer != None:
-                    #Lança uma thread para ouvir as mensagens do servidor e printar na tela
-                    thOuveMensagem = Thread(target=self.executaComando, args=(msgContainer, ), daemon=True)
-                    thOuveMensagem.start()
+            msgContainer = Classes.desempacotaMensagem(msgRecebida)
 
-                # Na thread principal disponibiliza o prompt para digitação de mensagens/comandos
-                msgAEnviar = input('({}) - '.format(dataHora))
+            self.executaComando(msgContainer)
 
-                msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
-                                            self.nickName, 'tela()', msgAEnviar)
-
-                self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
-
-            #Caso o cliente tenha desconectado do chat
-            except OSError:
-                break
 
     #Comando vindo do servidor para imprimir mensagens na tela
     def tela(self, msgContainer):
 
         timeMensagem = datetime.datetime.now().strftime('%H:%m:%S')
 
-        print('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
+        print('{}\n'.format(msgContainer.mensagem))
 
 
     #Comando vindo do servidor para fornecer o nick
@@ -75,17 +70,21 @@ class ClienteChat():
 
         timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
 
-        nick = input('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
-
-        self.nickName = nick
-
-        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', nick)
+        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, self.nickName, 'nick()',
+                            self.nickName)
 
         self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
 
     def enviaMensagem(self, msgContainer):
         dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+        msgAEnviar = input('{} - '.format(dataHora))
+
+        msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), msgContainer.ipOrigem,
+                                self.nickName, 'tela()', msgAEnviar)
+
+        self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
     def executaComando(self, msgContainer):
         if 'nick' in msgContainer.comando:
