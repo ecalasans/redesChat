@@ -24,8 +24,13 @@ class ClienteChat():
             self.clienteSocket = socket(AF_INET, SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
+            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+            self.nickName = input('{} - Digite seu nick:'.format(dataHora))
+
         except ConnectionError:
             print('Falha na conexão!')
+
 
         thOuvir = Thread(target=self.ouveMensagem, daemon=True)
         thOuvir.start()
@@ -40,7 +45,6 @@ class ClienteChat():
 
             self.clienteSocket.send(msgContainer.getMensagemCompleta().encode('utf-8'))
 
-            #todo:  Testar isso aqui
     #Recebe a mensagem do servidor e printa na tela
     def ouveMensagem(self):
         while True:
@@ -66,11 +70,8 @@ class ClienteChat():
 
         timeMensagem  = datetime.datetime.now().strftime('%H:%m:%S')
 
-        nick = input('{}({}) - {}'.format(timeMensagem, msgContainer.nickName, msgContainer.mensagem))
-
-        self.nickName = nick
-
-        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, nick, 'nick()', nick)
+        resposta = Mensagem(16 + len(''), msgContainer.ipDestino, msgContainer.ipOrigem, self.nickName, 'nick()',
+                            self.nickName)
 
         self.clienteSocket.send(resposta.getMensagemCompleta().encode('utf-8'))
 
