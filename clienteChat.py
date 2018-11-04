@@ -93,4 +93,7 @@ class ClienteChat():
             self.tela(msgContainer)
 
         if 'sair' in msgContainer.comando:
+            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+            print('{} - Você se desconectou!'.format(dataHora))
             self.clienteSocket.close()
+            exit(0)
