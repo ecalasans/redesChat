@@ -144,6 +144,8 @@ class ServidorChat:
 
         socketSolicitante.send(listaClientes.getMensagemCompleta().encode('utf-8'))
 
+        #Funcionando
+
 
 
     def nick(self, nick, ipCliente):
