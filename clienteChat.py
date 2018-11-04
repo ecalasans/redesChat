@@ -24,13 +24,12 @@ class ClienteChat():
             self.clienteSocket = socket(AF_INET, SOCK_STREAM)
             self.clienteSocket.connect((destino, porta))
 
-            dataHora = datetime.datetime.now().strftime('%H:%m:%S')
-
-            self.nickName = input('{} - Digite seu nick:'.format(dataHora))
-
         except ConnectionError:
             print('Falha na conexão!')
 
+        dataHora = datetime.datetime.now().strftime('%H:%m:%S')
+
+        self.nickName = input('{} - Digite seu nick:'.format(dataHora))
 
         thOuvir = Thread(target=self.ouveMensagem, daemon=True)
         thOuvir.start()
@@ -38,7 +37,7 @@ class ClienteChat():
         while True:
             dataHora = datetime.datetime.now().strftime('%H:%m:%S')
 
-            msgAEnviar = input('{} - '.format(dataHora))
+            msgAEnviar = input('')
 
             msgContainer = Mensagem(16 + len(msgAEnviar), Classes.getNetworkIP(), destino,
                                     self.nickName, 'tela()', msgAEnviar)
