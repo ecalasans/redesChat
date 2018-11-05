@@ -99,16 +99,22 @@ class ServidorChat:
 
             self.mensBroadcast(msgContainer, nick)
 
+        inLoop = True
+
         #Loop para transmissão das mensagens para todos os clientes
-        while True:
+        while inLoop:
             msgCliente = clienteSocket.recv(self.BUFFERSIZE).decode('utf-8')
 
             objMsgCliente = Classes.desempacotaMensagem(msgCliente)
 
+            self.executaComandos(msgCliente, nick)
+
+            inLoop = False
+
             msgContainer = Mensagem(str(16 + len(msgCliente)), self.HOST_INTERFACE_REDE,
                                     self.enderecos[clienteSocket][0], 'serv', 'tela()', objMsgCliente.mensagem)
 
-            self.tela(msgCliente)
+            #self.tela(msgCliente)
 
             self.mensBroadcast(msgContainer, nick)
 
@@ -182,7 +188,7 @@ class ServidorChat:
 
         for cliente in self.enderecos.items():
             msgContainer = Mensagem(str(16 + len(strMensagem)), self.HOST_INTERFACE_REDE,
-                                    cliente[0], 'serv', 'tela()', strMensagem)
+                                    cliente[0], 'serv', 'sair()', strMensagem)
             cliente[0].close()
 
     def validaNick(self, nick):
@@ -200,20 +206,53 @@ class ServidorChat:
         valido = True
         return valido
 
+    def desconectaCliente(self, nick):
+        strMensagem = ''
+        msgContainer = None
+
+        for clienteSock, clienteNick in self.clientes.items():
+            if clienteNick == nick:
+                try:
+                    strMensagem = 'Você se desconectou!'
+                    msgContainer = Mensagem(16 + len(strMensagem), self.HOST_INTERFACE_REDE,
+                                            self.enderecos[clienteSock][0], nick, 'tela()', strMensagem)
+                    clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+                    clienteSock.close()
+                except:
+                    strMensagem = 'Não foi possível se desconectar!'
+                    msgContainer = Mensagem(16 + len(strMensagem), self.HOST_INTERFACE_REDE,
+                                            self.enderecos[clienteSock][0], nick, 'tela()', strMensagem)
+                    clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+            else:
+                strMensagem = '{} desconectado!'.format(nick)
+                msgContainer = Mensagem(16 + len(strMensagem), self.HOST_INTERFACE_REDE,
+                                        self.enderecos[clienteSock][0], nick, 'tela()', strMensagem)
+                clienteSock.send(msgContainer.getMensagemCompleta().encode('utf-8'))
+
     #Seleciona e executa os comandos vindos do cliente
-    def executaComandos(self, mensagem):
+    def executaComandos(self, mensagem, nick):
+
+        feedback = False
 
         msgContainer = Classes.desempacotaMensagem(mensagem)
 
         if 'tela' in msgContainer.comando:
             self.tela(mensagem)
+            feedback = True
 
         if msgContainer.mensagem.find('nick') != -1:
             self.nick(msgContainer.nickName, msgContainer.ipOrigem)
+            feedback = True
 
         if msgContainer.mensagem.find('lista') != -1:
             self.lista(mensagem)
+            feedback = True
 
+        if msgContainer.mensagem.find('sair') != -1:
+            self.desconectaCliente(nick)
+            feedback = False
+
+        return feedback
 
 
 
